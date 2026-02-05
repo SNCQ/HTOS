@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import Literal, Callable, Awaitable, Any
 from enum import Enum
 from discord.ui.item import Item
-from psnawp_api.core.psnawp_exceptions import PSNAWPNotFoundError, PSNAWPAuthenticationError
+from psnawp_api.core.psnawp_exceptions import PSNAWPNotFound, PSNAWPAuthenticationError
 
 from google_drive.gd_functions import gdapi
 from google_drive.exceptions import GDapiError
@@ -515,7 +515,7 @@ async def psusername(ctx: discord.ApplicationContext, username: str) -> str:
             user_id = user.account_id
             user_id = handle_accid(user_id)
             delmsg = False
-        except PSNAWPNotFoundError:
+        except PSNAWPNotFound:
             user_id = await on_fail("Failed to search for username")
         except PSNAWPAuthenticationError as e:
             logger.exception(f"NPSSO disabled: {e}")
