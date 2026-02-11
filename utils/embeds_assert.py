@@ -14,8 +14,8 @@ from utils.embeds import (
     embmidComplete, embencComplete, keyset_emb, embpingsuccess, embpingfail,
     embExit, embresb, embresbs, embRdone, embLoading,
     embApplied, embqcCompleted, embchLoading, embkstone1, embkstone2,
-    embrrp, embrrps, embrrdone, embres, embress,
-    embRbdone, embLoad, embdec, paramEmb, embchErr,
+    embrrp, embrrps, embrrdone, embrrpsf, embres, embress,
+    embRbdone, embressf, embLoad, embdec, paramEmb, embchErr,
     embErrconv, embErrdec, embchgtav, embchrdr2, embfn,
     embFileLarge, embnvSys, embpn, embnvBin, embffn,
     embgddone, embuplSuccess, embe, embuplSuccess1, embencupl,
@@ -82,7 +82,7 @@ _MAP_PLACEHOLDER = {
     embpingfail: {("title", frozenset({"ftp_result", "socket_result", "instances_len", "maximum_instances", "latency"}))},
     embExit: set(),
     embresb: {("description", frozenset({"savename", "i", "savecount"}))},
-    embresbs: {("description", frozenset({"savename", "id", "i", "savecount"}))},
+    embresbs: {("description", frozenset({"savename", "id"}))},
     embRdone: {("description", frozenset({"printed", "id"}))},
     embLoading: {("description", frozenset({"basename", "j", "count_entry", "i", "batches"}))},
     embApplied: {("description", frozenset({"basename", "j", "count_entry", "i", "batches"}))},
@@ -93,9 +93,11 @@ _MAP_PLACEHOLDER = {
     embrrp: {("description", frozenset({"savename", "j", "savecount", "i", "batches"}))},
     embrrps: {("description", frozenset({"savename", "id", "target_titleid", "j", "savecount", "i", "batches"}))},
     embrrdone: {("description", frozenset({"printed", "id", "target_titleid", "i", "batches"}))},
+    embrrpsf: {("description", frozenset({"printed", "id", "target_titleid"}))},
     embres: {("description", frozenset({"savename", "j", "savecount", "i", "batches"}))},
-    embress: {("description", frozenset({"savename", "id", "j", "savecount", "i", "batches"}))},
+    embress: {("description", frozenset({"savename", "id"}))},
     embRbdone: {("description", frozenset({"printed", "id", "i", "batches"}))},
+    embressf: {("description", frozenset({"printed", "id"}))},
     embLoad: {("description", frozenset({"filename"}))},
     embdec: {("description", frozenset({"filename"}))},
     paramEmb: set(),
@@ -123,7 +125,7 @@ _MAP_PLACEHOLDER = {
     emb_il: {("description", frozenset({"error"}))},
     embdecTimeout: set(),
     embdecFormat: {("title", frozenset({"savename"}))},
-    embwlcom: {("description", frozenset({"user"}))}
+    embwlcom: {("title", frozenset({"user"}))}
 }
 
 for emb, v in _MAP_PLACEHOLDER.items():
@@ -152,7 +154,13 @@ for emb, v in _MAP_PLACEHOLDER.items():
                 fmt = emb.description
             fmt.format(**dummy_values)
             actual_fields = {fname for _, fname, _, _ in string.Formatter().parse(fmt) if fname}
-            assert len(dummy_values.keys()) == len(actual_fields)
+            if len(dummy_values.keys()) != len(actual_fields):
+                print("\n=== EMBED PLACEHOLDER MISMATCH ===")
+                print("Embed title:", emb.title)
+                print("Expected:", dummy_values.keys())
+                print("Actual:", actual_fields)
+                print("Description:", emb.description)
+                raise AssertionError("Placeholder mismatch")
         except KeyError as e:
             raise AssertionError(
                 f"Cannot find placeholder {e} in the {field} of the embed with\n"
