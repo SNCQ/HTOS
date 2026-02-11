@@ -9,20 +9,20 @@ class Color(Enum):
     YELLOW = 0xD2D624
 
 class Embed_t(Enum):
-    DEFAULT_FOOTER = f"Made by hzh. ({VERSION})"
-    QR_FOOTER1 = "Respond with the number of your desired game, or type 'EXIT' to quit."
-    QR_FOOTER2 = "Respond with the number of your desired save, or type 'BACK' to go to the game menu."
+    DEFAULT_FOOTER = f"Hosted By SNCQ"
+    QR_FOOTER1 = "Respond with the number of your desired game, or type 'EXIT' to quit.\nاكتب رقم اللعبه الي بغيتها, او اكتب 'EXIT' للخروج."
+    QR_FOOTER2 = "Respond with the number of your desired save, or type 'BACK' to go to the game menu.\nاكتب رقم التخزينة الي بغيتها, او اكتب 'BACK' للرجوع الى قائمة الألعاب."
 
 embUtimeout = discord.Embed(
-    title="Upload alert: Error",
-    description="Time's up! You didn't attach any files.",
+    title="Upload alert: Error <a:tickred:1142861498260148224>\nإشعار لإرسال الملف: حدث خطأ <a:tickred:1142861498260148224>",
+    description="- Time's up! You didn't attach any files.\n- انتهى الوقت! و لم تقم بإرسال الملفات.",
     colour=Color.DEFAULT.value
 )
 embUtimeout.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embgdt = discord.Embed(
-    title="Google drive upload: Error",
-    description="You did not respond with the link in time!",
+    title="Google drive upload: Error <a:tickred:1142861498260148224>\nرابط جوجل درايف: حدث خطأ <a:tickred:1142861498260148224>",
+    description="You did not respond with the link in time!\nلم تقم بإرسال الرابط في الوقت المناسب!",
     colour=Color.DEFAULT.value
 )
 embgdt.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -35,36 +35,41 @@ embhttp = discord.Embed(
 embhttp.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embEncrypted1 = discord.Embed(
-    title="Resigning process: Encrypted",
-    description="Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.",
+    title="Resigning process: Encrypted\nعميلة التحويل: تخزينة مشفرة",
+    description="- Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.\n"
+    f"- الرجاء ارسال على الأقل ملفين للتخزينة من نوع (.bin و بدون bin). او اكتب 'EXIT' للخروج",
     colour=Color.DEFAULT.value
 )
 embEncrypted1.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embDecrypt1 = discord.Embed(
-    title="Decrypt Process",
-    description="Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.",
+    title="Decrypt Process\nعملية فك التشفير",
+    description="- Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.\n"
+    f"- الرجاء ارسال على الأقل ملفين للتخزينة من نوع (.bin و بدون bin). او اكتب 'EXIT' للخروج",
     colour=Color.DEFAULT.value
 )
 embDecrypt1.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 emb14 = discord.Embed(
-    title="Resigning process: Decrypted",
-    description="Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.",
+    title="Resigning process: Decrypted\nعملية التحويل: فك التشفير",
+    description="- Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.\n"
+    f"- الرجاء ارسال على الأقل ملفين للتخزينة من نوع (.bin و بدون bin). او اكتب 'EXIT' للخروج",
     colour=Color.DEFAULT.value
 )
 emb14.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 emb20 = discord.Embed(
-    title="Re-region process: Upload encrypted files from the FOREIGN region",
-    description="Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.",
+    title="Re-region process: Upload encrypted files from the FOREIGN region\nعملية تغيير الريجون: ارسل ملفات التخزينة للريجون المختلف",
+    description="- Please attach at least two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.\n"
+    f"- الرجاء ارسال على الأقل ملفين للتخزينة من نوع (.bin و بدون bin). او اكتب 'EXIT' للخروج",
     colour=Color.DEFAULT.value
 )
 emb20.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 emb21 = discord.Embed(
-    title="Re-region process: Upload encrypted files from YOUR region",
-    description="Please attach two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.",
+    title="Re-region process: Upload encrypted files from YOUR region\nعملية تغيير الريجون: ارسل ملفات التخزينة للريجون حقك",
+    description="- Please attach two encrypted savefiles that you want to upload (.bin and non bin). Or type 'EXIT' to cancel command.\n"
+    f"- الرجاء ارسال ملفين للتخزينة من نوع (.bin و بدون bin). او اكتب 'EXIT' للخروج",
     colour=Color.DEFAULT.value
 )
 emb21.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -77,30 +82,34 @@ embpng = discord.Embed(
 embpng.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 emb8 = discord.Embed(
-    title="Error: PSN username",
-    description=f"{{msg}}. You have {OTHER_TIMEOUT} seconds to reply with your account ID instead.\nOr type 'EXIT' to cancel command.",
+    title="Error: PSN username <a:tickred:1142861498260148224>\nخطأ: اسم حساب بلايستيشن <a:tickred:1142861498260148224>",
+    description=f"- {{msg}}. You have {OTHER_TIMEOUT} seconds to reply with your account ID instead.\nOr type 'EXIT' to cancel command.\n"
+    f"- اسم حساب البلايستشن الذي ادخلته غير صحيح, لديك  {OTHER_TIMEOUT} ثانية للرد برقم حسابك بدال الأسم.\n  - او اكتب 'EXIT' لإلغاء العمليه.",
     colour=Color.YELLOW.value
 )
 emb8.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embnt = discord.Embed(
-    title="Error: Time limit reached",
-    description="You did not send your account ID in time.",
+    title="Error: Time limit reached <a:tickred:1142861498260148224>\nخطأ: انتهى الوقت <a:tickred:1142861498260148224>",
+    description="- You did not send your account ID in time.\n"
+    f"- لم تقم بإرسال رقم حسابك في الوقت المناسب.",
     colour=Color.DEFAULT.value
 )
 embnt.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embvalidpsn = discord.Embed(
-    title="Obtained: PSN username",
-    description="Your input was a valid PSN username.",
+    title="Obtained: PSN username <a:tick_mark:1142861488206381056>\nتم الحصول على: اسم مستخدم بلايستيتشن <a:tick_mark:1142861488206381056>",
+    description="- Your input was a valid PSN username.\n"
+    f"- اسم حسابك صحيح.",
     colour=Color.DEFAULT.value
 )
 embvalidpsn.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embinit = discord.Embed(
-    title="Thread creator",
-    description="Click button to get started!\nYou can also use old threads that you have created with the bot.",
-    colour=Color.DEFAULT.value
+    title="Save Wizard Bot | بوت سيف وزرد",
+    description="- Click **`Create thread`** button to get started!\n  - You can also use old threads that you have created with the bot.\n"
+    f"- إضغط على زر **`Create thread`** للبدء!\n  - تستطيع ايضا استخدام الرسائل القديمة مع البوت.",
+    colour=discord.Color.from_rgb(0, 255, 255)
 )
 embinit.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
@@ -163,7 +172,7 @@ working_emb = discord.Embed(
 working_emb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 retry_emb = discord.Embed(
-    title="Please try again.",
+    title="Please try again.\nيرجى المحاولة مرة أخرى.",
     color=Color.DEFAULT.value
 )
 retry_emb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -175,8 +184,8 @@ blacklist_emb = discord.Embed(
 blacklist_emb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embChannelError = discord.Embed(
-    title="Error",
-    description="Invalid channel!",
+    title="Error | خطأ",
+    description="- Invalid channel!\n- قناة خاطئة!",
     colour=Color.DEFAULT.value
 )
 embChannelError.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -273,7 +282,7 @@ emb_conv_choice = discord.Embed(
 emb_conv_choice.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embCDone1 = discord.Embed(
-    title="TIMED OUT!",
+    title="Timed Out!\nانتهى الوقت!",
     colour=Color.DEFAULT.value
 )
 embCDone1.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -414,20 +423,20 @@ keyset_emb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embpingsuccess = discord.Embed(
     title=(
-        "FTP: **{ftp_result}**\n"
-        "CECIE: **{socket_result}**\n"
-        "Active instances: **{instances_len}**/**{maximum_instances}**\n"
-        "Latency: **{latency: .2f}** ms"
+        "📂 FTP: **{ftp_result}**\n"
+        "🌐 CECIE: **{socket_result}**\n"
+        "🟢 Active instances: **{instances_len}**/**{maximum_instances}**\n"
+        "⏱️ Latency: **{latency: .2f}** ms"
     ),
     colour=Color.GREEN.value)
 embpingsuccess.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embpingfail = discord.Embed(
     title=(
-        "FTP: **{ftp_result}**\n"
-        "CECIE: **{socket_result}**\n"
-        "Active instances: **{instances_len}**/**{maximum_instances}**\n"
-        "Latency: **{latency: .2f}** ms"
+        "📂 FTP: **{ftp_result}**\n"
+        "🌐 CECIE: **{socket_result}**\n"
+        "🟢 Active instances: **{instances_len}**/**{maximum_instances}**\n"
+        "⏱️ Latency: **{latency: .2f}** ms"
     ),
     colour=Color.RED.value)
 embpingfail.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -436,29 +445,48 @@ embExit = discord.Embed(title="Exited.", colour=Color.DEFAULT.value)
 embExit.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embresb = discord.Embed(
-    title="Resigning process: Encrypted",
-    description="Your save (**{savename}**) is being resigned ({i}/{savecount}), please wait...\nSend 'EXIT' to cancel.",
+    title="Resigning process: Encrypted\nعميلة التحويل: تخزينة مشفرة",
+    description=(
+        "- Your save (**{savename}**) is being resigned ({i}/{savecount}), please wait... ⏰\n  - Send 'EXIT' to cancel.\n"
+        "- تخزينتك (**{savename}**) يتم تحويلها (**{i}/{savecount}**), الرجاء الإنتظار... ⏰\n  - اكتب 'EXIT' لإلغاء العمليه."
+    ),
     colour=Color.DEFAULT.value
 )
 embresb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embresbs = discord.Embed(
-    title="Resigning process (Encrypted): Successful",
-    description="**{savename}** resigned to **{id}** ({i}/{savecount}).",
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{savename}** resigned to **{id}**.\n"
+        "- **{id}** تم تحويلها الى **{savename}**."
+    ),
     colour=Color.DEFAULT.value
 )
 embresbs.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embRdone = discord.Embed(
-    title="Resigning process (Encrypted): Successful",
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "**{printed}** resigned to **{id}**.\n"
-        "Uploading file...\n"
-        "If file is being uploaded to Google Drive, you can send 'EXIT' to cancel."
+        "- **{printed}** resigned to **{id}**.\n"
+        "  - Uploading file...\n"
+        "  - If file is being uploaded to Google Drive, you can send 'EXIT' to cancel.\n"
+        "- **{id}** تم تحويلها الى **{printed}**.\n"
+        "  - يتم رفع الملفات...\n"
+        "  - اذا الملف يتم رفعه على جوجل درايف, تقدر تكتب 'EXIT' لإلغاء العمليه."
     ),
     colour=Color.DEFAULT.value
 )
 embRdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+
+embresbsf = discord.Embed(
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{printed}** resigned to **{id}**.\n"
+        "- **{id}** تم تحويلها الى **{printed}**."
+    ),
+    colour=Color.DEFAULT.value
+)
+embresbsf.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embLoading = discord.Embed(
     title="Loading",
@@ -507,53 +535,90 @@ embkstone2 = discord.Embed(
 embkstone2.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embrrp = discord.Embed(
-    title="Re-regioning process: Encrypted",
-    description="Your save (**{savename}**) is being re-regioned & resigned, (save {j}/{savecount}, batch {i}/{batches}), please wait...\nSend 'EXIT' to cancel.",
-    colour=Color.DEFAULT.value
+    title="Re-regioning process: Encrypted\nعملية تغيير الريجون: تخزينة مشفرة",
+    description=(
+        "- Your save (**{savename}**) is being re-regioned & resigned, (save {j}/{savecount}, batch {i}/{batches}), please wait...\n  - Send 'EXIT' to cancel.\n"
+        "- تخزينتك (**{savename}**) يتم الاّن تحويلها و تغيير الريجون, (تخزينة {j}/{savecount}, من {i}/{batches}), يرجى الإنتظار...\n  - أكتب 'EXIT' لإلغاء العمليه."
+    ),
 )
 embrrp.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embrrps = discord.Embed(
-    title="Re-regioning (Encrypted): Successful",
-    description="**{savename}** re-regioned & resigned to **{id}** (**{target_titleid}**), (save {j}/{savecount}, batch {i}/{batches}).",
+    title="Re-regioning (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تغيير الريجون: ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{savename}** re-regioned & resigned to **{id}** (**{target_titleid}**), (save {j}/{savecount}, batch {i}/{batches}).\n"
+        "- **{id}** تم تحويلها و تغيير الرجون الى **{savename}** (**{target_titleid}**), (تخزينة {j}/{savecount}, من {i}/{batches})."
+    ),
     colour=Color.DEFAULT.value
 )
 embrrps.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embrrdone = discord.Embed(
-    title="Re-region: Successful",
+    title="Re-region: Successful <a:tick_mark:1142861488206381056>\n عملية تغيير الريجون: ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "**{printed}** re-regioned & resigned to **{id}** (**{target_titleid}**), (batch {i}/{batches}).\n"
-        "Uploading file...\n"
-        "If file is being uploaded to Google Drive, you can send 'EXIT' to cancel."
+        "- **{printed}** re-regioned & resigned to **{id}** (**{target_titleid}**), (batch {i}/{batches}).\n"
+        "  - Uploading file...\n"
+        "  - If file is being uploaded to Google Drive, you can send 'EXIT' to cancel.\n"
+        "- **{id}** تم تحويلها و تغيير الريجون الى **{printed}** (**{target_titleid}**), ({i}/{batches}).\n"
+        "  - يتم رفع الملفات...\n"
+        "  - اذا الملف يتم رفعه على جوجل درايف, تقدر تكتب 'EXIT' لإلغاء العملية." 
     ),
     colour=Color.DEFAULT.value
 )
 embrrdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
+embrrpsf = discord.Embed(
+    title="Re-regioning (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تغيير الريجون: ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{printed}** re-regioned & resigned to **{id}** - (**{target_titleid}**).\n"
+        "- (**{target_titleid}**) - **{id}** تم تحويلها و تغيير الرجون الى **{printed}**"
+    ),
+    colour=Color.DEFAULT.value
+)
+embrrpsf.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+
 embres = discord.Embed(
-    title="Resigning process: Encrypted",
-    description="Your save (**{savename}**) is being resigned, (save {j}/{savecount}, batch {i}/{batches}), please wait...\nSend 'EXIT' to cancel.",
+    title="Resigning process: Encrypted Save\nعميلة التحويل:  تخزينة مشفرة",
+    description=(
+        "- Your save (**{savename}**) is being resigned, (save {j}/{savecount}, batch {i}/{batches}), please wait... ⏰\n  - Send 'EXIT' to cancel.\n"
+        "- تخزينتك (**{savename}**) يتم تحويلها (**{j}/{savecount}**, من **{i}/{batches}**), الرجاء الإنتظار... ⏰\n  - أكتب 'EXIT' لإلغاء العمليه."
+    ),
     colour=Color.DEFAULT.value
 )
 embres.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embress = discord.Embed(
-    title="Resigning process (Encrypted): Successful",
-    description="**{savename}** resigned to **{id}** (save {j}/{savecount}, batch {i}/{batches}).",
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{savename}** resigned to **{id}**.\n"
+        "- **{id}** تم تحويلها الى **{savename}**."
+    ),
     colour=Color.DEFAULT.value
 )
 embress.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embRbdone = discord.Embed(
-    title="Resigning process (Encrypted): Successful",
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "**{printed}** resigned to **{id}** (batch {i}/{batches}).\n"
-        "Uploading file...\n"
-        "If file is being uploaded to Google Drive, you can send 'EXIT' to cancel."
+        "- **{printed}** resigned to **{id}** (batch {i}/{batches}).\n"
+        "  - Uploading file...\n"
+        "  - If file is being uploaded to Google Drive, you can send 'EXIT' to cancel.\n"
+        "- .({i}/{batches}) **{id}** تم تحويلها الى **{printed}**\n"
+        "  - يتم رفع الملفات...\n"
+        "  - اذا الملف يتم رفعه على جوجل درايف, تقدر تكتب 'EXIT' لإلغاء العملية."
     ),
     colour=Color.DEFAULT.value)
 embRbdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+
+embressf = discord.Embed(
+    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
+    description=(
+        "- **{printed}** resigned to **{id}**.\n"
+        "- **{id}** تم تحويلها الى **{printed}**."
+    ),
+    colour=Color.DEFAULT.value
+)
+embressf.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embLoad = discord.Embed(
     title="Loading",
@@ -676,7 +741,7 @@ embuplSuccess = discord.Embed(
 embuplSuccess.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embe = discord.Embed(
-    title="Error",
+    title="Error | خطأ",
     description="{error}",
     colour=Color.RED.value
 )
@@ -718,13 +783,13 @@ embencinst.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embgdout = discord.Embed(
     title="Google Drive: Upload complete",
-    description="[Download]({url})\n{extra_msg}",
+    description="[Download | تحميل]({url})\n{extra_msg}",
     colour=Color.DEFAULT.value
 )
 embgdout.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embgames = discord.Embed(
-    title="All available games",
+    title="All available games\nكل الألعاب المتوفرة",
     colour=Color.DEFAULT.value
 )
 embgames.set_footer(text=Embed_t.QR_FOOTER1.value)
@@ -754,8 +819,23 @@ embdecFormat = discord.Embed(
 embdecFormat.set_footer(text="If you want to use the file in a save editor, choose 'Decrypted'!")
 
 embwlcom = discord.Embed(
-    title="Welcome",
-    description="Hello **{user}**.",
+    title="Welcome {user} | اهلاً و سهلاً يا {user}",
+    description=(
+                f"📌 **How to use the bot:**\n"
+                f"- Type **`/`** and select a command to begin.\n\n"
+                f"❓ **Need help?**\n"
+                f"- Type **`/help`** or ask in <#901212631103328318>.\n\n"
+                f"📌 **طريقة استخدام البوت:**\n"
+                f"- اكتب **`/`** واختر الأمر الذي تريده.\n\n"
+                f"❓ **تحتاج مساعده ؟**\n"
+                f"- اكتب **`/help`** او اسأل في <#901212631103328318>.\n\n\n"
+                f"### ⚠️ **Important:**\n"
+                f"- Please do not use more than one PlayStation account or your access will be permanently revoked.\n"
+                f"- **Only** <@&1169543372717953024> **are allowed to use many PlayStation accounts.**\n\n"
+                f"### ⚠️ **مهم:**\n"
+                f"- يرجى عدم استخدام أكثر من حساب بلايستيشن واحد وإلا سيتم سحب صلاحيتك بشكل دائم.\n"
+                f"- **فقط** <@&1169543372717953024> **مسموح لهم استخدام اكثر من حساب بلايستيشن.**"
+                ),
     colour=Color.DEFAULT.value
 )
 embwlcom.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
