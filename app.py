@@ -68,4 +68,3 @@ ui.run(
     dark=True,
     window_size=(1400, 800)
 )
-
