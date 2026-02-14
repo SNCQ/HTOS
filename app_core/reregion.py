@@ -1,157 +1,124 @@
-import discord
-import asyncio
 import shutil
-import aiofiles.os
-from discord.ext import commands
-from discord import Option
-from aiogoogle import HTTPError
+
+from nicegui import ui, app
+from nicegui.events import ValueChangeEventArguments
+from webview import FileDialog
+from aiofiles.os import makedirs, mkdir
+
+from app_core.models import Profiles, Settings, Logger, TabBase
+from app_core.helpers import prepare_save_input_folder, check_save, prepare_single_save_folder
 from network.socket_functions import C1socket
 from network.ftp_functions import FTPps
 from network.exceptions import SocketError, FTPError
-from google_drive.gd_functions import gdapi
-from google_drive.exceptions import GDapiError
-from utils.constants import (
-    IP, PORT_FTP, PS_UPLOADDIR, MAX_FILES, BASE_ERROR_MSG, ZIPOUT_NAME, PS_ID_DESC, SHARED_GD_LINK_DESC, CON_FAIL, CON_FAIL_MSG, COMMAND_COOLDOWN,
-    SPECIAL_REREGION_TITLEIDS,
-    logger
-)
-from utils.embeds import (
-    emb21, emb20, embkstone1, embkstone2, embrrp, embrrps, embrrdone, embrrpsf
-)
-from utils.workspace import init_workspace, make_workspace, cleanup, cleanup_simple
-from utils.helpers import DiscordContext, psusername, upload2, error_handling, send_final, task_handler
+from utils.constants import IP, PORT_FTP, PS_UPLOADDIR, SPECIAL_REREGION_TITLEIDS
+from utils.workspace import init_workspace, cleanup, cleanup_simple
 from utils.orbis import SaveBatch, SaveFile
-from utils.exceptions import PSNIDError, FileError, WorkspaceError, OrbisError, TaskCancelledError
-from utils.instance_lock import INSTANCE_LOCK_global
+from utils.exceptions import OrbisError
 
-class ReRegion(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot = bot
+class Reregion(TabBase):
+    def __init__(self, profiles: Profiles, settings: Settings) -> None:
+        super().__init__("Re-region", profiles, settings)
+        self.in_sample_file = ""
 
-    @discord.slash_command(description="Change the region of a save (Must be from the same game).")
-    @commands.cooldown(1, COMMAND_COOLDOWN, commands.BucketType.user)
-    async def reregion(
-              self,
-              ctx: discord.ApplicationContext,
-              playstation_id: Option(str, description=PS_ID_DESC, default=""),
-              shared_gd_link: Option(str, description=SHARED_GD_LINK_DESC, default="")
-            ) -> None:
+    def construct(self) -> None:
+        with ui.row().style("align-items: center"):
+            self.input_button = ui.button("Select folder of savefiles", on_click=self.on_input)
+            self.in_label = ui.input(on_change=self.on_input_label, value=self.in_folder).props("clearable")
+        with ui.row().style("align-items: center"):
+            self.output_button = ui.button("Select output folder", on_click=self.on_output)
+            self.out_label = ui.input(on_change=self.on_output_label, value=self.out_folder).props("clearable")
+        with ui.row():
+            self.sample_save_button = ui.button("Select sample save from your region (target title id)", on_click=self.on_sample_save)
+            self.sample_save_label = ui.input(on_change=self.on_sample_save_in).props("clearable")
+        self.start_button = ui.button("Start", on_click=self.on_start)
+        self.logger = Logger(self.settings)
+
+    async def on_start(self) -> None:
+        if not await self.validation():
+            ui.notify("Invalid paths/files!")
+            return
+        if not self.profiles.is_selected():
+            ui.notify("No profile selected!")
+            return
+        self.disable_buttons()
+
+        p = self.profiles.selected_profile.copy()
+
+        self.logger.clear()
+        self.logger.info("Starting re-region...")
 
         newUPLOAD_ENCRYPTED, newUPLOAD_DECRYPTED, newDOWNLOAD_ENCRYPTED, newPNG_PATH, newPARAM_PATH, newDOWNLOAD_DECRYPTED, newKEYSTONE_PATH = init_workspace()
-        workspace_folders = [newUPLOAD_ENCRYPTED, newUPLOAD_DECRYPTED, newDOWNLOAD_ENCRYPTED,
+        workspace_folders = [newUPLOAD_ENCRYPTED, newUPLOAD_DECRYPTED, newDOWNLOAD_ENCRYPTED, 
                             newPNG_PATH, newPARAM_PATH, newDOWNLOAD_DECRYPTED, newKEYSTONE_PATH]
-        try: await make_workspace(ctx, workspace_folders, ctx.channel_id)
-        except (WorkspaceError, discord.HTTPException): return
+        for folder in workspace_folders:
+            try:
+                await makedirs(folder, exist_ok=True)
+            except OSError:
+                self.logger.exception("Failed to create workspace. Stopped.")
+                self.enable_buttons()
+                return
+
         C1ftp = FTPps(IP, PORT_FTP, PS_UPLOADDIR, newDOWNLOAD_DECRYPTED, newUPLOAD_DECRYPTED, newUPLOAD_ENCRYPTED,
-                    newDOWNLOAD_ENCRYPTED, newPARAM_PATH, newKEYSTONE_PATH, newPNG_PATH)
+                    self.out_folder, newPARAM_PATH, newKEYSTONE_PATH, newPNG_PATH)
         mount_paths = []
 
-        msg = ctx
-
         try:
-            user_id = await psusername(ctx, playstation_id)
-            await asyncio.sleep(0.5)
-            shared_gd_folderid = await gdapi.parse_sharedfolder_link(shared_gd_link)
-            msg = await ctx.edit(embed=emb21)
-            msg = await ctx.fetch_message(msg.id) # use message id instead of interaction token, this is so our command can last more than 15 min
-            d_ctx = DiscordContext(ctx, msg) # this is for passing into functions that need both
-            uploaded_file_paths = (await upload2(d_ctx, newUPLOAD_ENCRYPTED, max_files=2, sys_files=False, ps_save_pair_upload=True, ignore_filename_check=False))[0]
-        except HTTPError as e:
-            err = gdapi.getErrStr_HTTPERROR(e)
-            await error_handling(msg, err, workspace_folders, None, None, None)
-            logger.info(f"{e} - {ctx.user.name} - (expected)", exc_info=True)
-            await INSTANCE_LOCK_global.release(ctx.author.id)
-            return
-        except (PSNIDError, TimeoutError, GDapiError, FileError, OrbisError, TaskCancelledError) as e:
-            await error_handling(msg, e, workspace_folders, None, None, None)
-            logger.info(f"{e} - {ctx.user.name} - (expected)", exc_info=True)
-            await INSTANCE_LOCK_global.release(ctx.author.id)
-            return
-        except Exception as e:
-            await error_handling(msg, BASE_ERROR_MSG, workspace_folders, None, None, None)
-            logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-            await INSTANCE_LOCK_global.release(ctx.author.id)
+            real_sample_savepair = await prepare_single_save_folder(self.sample_savepair, newUPLOAD_ENCRYPTED)
+        except OSError:
+            await cleanup_simple(workspace_folders)
+            self.logger.exception("Unexpected error. Stopping...")
+            self.enable_buttons()
             return
 
-        batch = SaveBatch(C1ftp, C1socket, user_id, uploaded_file_paths, mount_paths, newDOWNLOAD_ENCRYPTED)
+        batch = SaveBatch(C1ftp, C1socket, p.account_id, list(real_sample_savepair), mount_paths, self.out_folder)
         savefile = SaveFile("", batch, True)
         try:
             await batch.construct()
-            savefile.path = uploaded_file_paths[0].removesuffix(".bin")
+            savefile.path = real_sample_savepair[0]
             await savefile.construct()
+            self.logger.info(f"Obtaining keystone from {savefile.basename}...")
 
-            emb = embkstone1.copy()
-            emb.description = emb.description.format(savename=savefile.basename)
-            tasks = [
-                savefile.dump,
-                lambda: savefile.download_sys_elements([savefile.ElementChoice.SFO, savefile.ElementChoice.KEYSTONE])
-            ]
-            await task_handler(d_ctx, tasks, [emb])
-
+            await savefile.dump()
+            await savefile.download_sys_elements([savefile.ElementChoice.SFO, savefile.ElementChoice.KEYSTONE])
             target_titleid = savefile.title_id
-
-            emb = embkstone2.copy()
-            emb.description = emb.description.format(target_titleid=target_titleid)
-            await msg.edit(embed=emb)
+            self.logger.info(f"Keystone from {savefile.basename} ({target_titleid}) obtained.")
 
             shutil.rmtree(newUPLOAD_ENCRYPTED)
-            await aiofiles.os.mkdir(newUPLOAD_ENCRYPTED)
-
+            await mkdir(newUPLOAD_ENCRYPTED)
             await C1ftp.delete_list(PS_UPLOADDIR, [savefile.realSave, savefile.realSave + ".bin"])
-        except (SocketError, FTPError, OrbisError, OSError, TaskCancelledError) as e:
-            status = "expected"
-            if isinstance(e, OSError) and e.errno in CON_FAIL:
-                e = CON_FAIL_MSG
-            elif isinstance(e, OSError):
-                e = BASE_ERROR_MSG
-                status = "unexpected"
-            await error_handling(msg, e, workspace_folders, batch.entry, mount_paths, C1ftp)
-            if status == "expected":
-                logger.info(f"{e} - {ctx.user.name} - ({status})", exc_info=True)
-            else:
-                logger.exception(f"{e} - {ctx.user.name} - ({status})")
-            await INSTANCE_LOCK_global.release(ctx.author.id)
-            return
-        except Exception as e:
-            await error_handling(msg, BASE_ERROR_MSG, workspace_folders, batch.entry, mount_paths, C1ftp)
-            logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-            await INSTANCE_LOCK_global.release(ctx.author.id)
+        except (SocketError, FTPError, OrbisError, OSError) as e:
+            await cleanup(C1ftp, workspace_folders, batch.entry, mount_paths)
+            self.logger.error(f"`{str(e)}` Stopping...")
+            self.enable_buttons()
             return
 
         try:
-            await msg.edit(embed=emb20)
-            uploaded_file_paths = await upload2(d_ctx, newUPLOAD_ENCRYPTED, max_files=MAX_FILES, sys_files=False, ps_save_pair_upload=True, ignore_filename_check=False)
-        except HTTPError as e:
-            err = gdapi.getErrStr_HTTPERROR(e)
-            await error_handling(msg, err, workspace_folders, None, mount_paths, C1ftp)
-            logger.info(f"{e} - {ctx.user.name} - (expected)", exc_info=True)
-            await INSTANCE_LOCK_global.release(ctx.author.id)
+            saves = await prepare_save_input_folder(self.settings, self.logger, self.in_folder, newUPLOAD_ENCRYPTED)
+        except OrbisError as e:
+            await cleanup(C1ftp, workspace_folders, None, mount_paths)
+            self.logger.error(f"`{str(e)}` Stopping...")
+            self.enable_buttons()
             return
-        except (TimeoutError, GDapiError, FileError, OrbisError, TaskCancelledError) as e:
-            await error_handling(msg, e, workspace_folders, None, mount_paths, C1ftp)
-            logger.info(f"{e} - {ctx.user.name} - (expected)", exc_info=True)
-            await INSTANCE_LOCK_global.release(ctx.author.id)
-            return
-        except Exception as e:
-            await error_handling(msg, BASE_ERROR_MSG, workspace_folders, None, mount_paths, C1ftp)
-            logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-            await INSTANCE_LOCK_global.release(ctx.author.id)
+        except OSError:
+            await cleanup(C1ftp, workspace_folders, None, mount_paths)
+            self.logger.exception("Unexpected error. Stopping...")
+            self.enable_buttons()
             return
 
         special_reregion = target_titleid in SPECIAL_REREGION_TITLEIDS
 
-        batches = len(uploaded_file_paths)
+        batches = len(saves)
 
         i = 1
-        for entry in uploaded_file_paths:
+        for entry in saves:
             batch.entry = entry
             try:
                 await batch.construct()
-            except OSError as e:
-                await error_handling(msg, BASE_ERROR_MSG, workspace_folders, None, mount_paths, C1ftp)
-                logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-                await INSTANCE_LOCK_global.release(ctx.author.id)
-                return
+            except OSError:
+               await cleanup(C1ftp, workspace_folders, None, mount_paths)
+               self.logger.exception("Unexpected error. Stopping...")
+               self.enable_buttons()
+               return
 
             extra_msg = ""
             j = 1
@@ -162,77 +129,62 @@ class ReRegion(commands.Cog):
                     savefile.title_id = target_titleid
                     savefile.downloaded_sys_elements.add(savefile.ElementChoice.KEYSTONE)
 
-                    emb = embrrp.copy()
-                    emb.description = emb.description.format(savename=savefile.basename, j=j, savecount=batch.savecount, i=i, batches=batches)
-                    tasks = [
-                        savefile.dump,
-                        savefile.resign
-                    ]
-                    await task_handler(d_ctx, tasks, [emb])
+                    info = f"(save {j}/{batch.savecount}, batch {i}/{batches})"
+                    self.logger.info(f"Re-regioning **{savefile.basename}**, {info}...")
 
-                    emb = embrrps.copy()
-                    emb.description = emb.description.format(savename=savefile.basename, id=playstation_id or user_id, target_titleid=target_titleid, j=j, savecount=batch.savecount, i=i, batches=batches)
-                    await msg.edit(embed=emb)
-                    j += 1
-                except (SocketError, FTPError, OrbisError, OSError, TaskCancelledError) as e:
-                    status = "expected"
-                    if isinstance(e, OSError) and e.errno in CON_FAIL: 
-                        e = CON_FAIL_MSG
-                    elif isinstance(e, OSError):
-                        e = BASE_ERROR_MSG
-                        status = "unexpected"
-                    await error_handling(msg, e, workspace_folders, batch.entry, mount_paths, C1ftp)
-                    if status == "expected":
-                        logger.info(f"{e} - {ctx.user.name} - ({status})", exc_info=True)
-                    else:
-                        logger.exception(f"{e} - {ctx.user.name} - ({status})")
-                    await INSTANCE_LOCK_global.release(ctx.author.id)
+                    await savefile.dump()
+                    await savefile.resign()
+                    self.logger.info(f"Re-regioned **{savefile.basename}** to {p} (**{target_titleid}**), {info}.")
+
+                except (SocketError, FTPError, OrbisError, OSError) as e:
+                    await cleanup(C1ftp, workspace_folders, batch.entry, mount_paths)
+                    self.logger.error(f"`{str(e)}` Stopping...")
+                    self.enable_buttons()
                     return
-                except Exception as e:
-                    await error_handling(msg, BASE_ERROR_MSG, workspace_folders, batch.entry, mount_paths, C1ftp)
-                    logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-                    await INSTANCE_LOCK_global.release(ctx.author.id)
+                except Exception:
+                    await cleanup(C1ftp, workspace_folders, batch.entry, mount_paths)
+                    self.logger.exception("Unexpected error. Stopping...")
+                    self.enable_buttons()
                     return
-
-            emb = embrrdone.copy()
-            emb.description = emb.description.format(printed=batch.printed, id=playstation_id or user_id, target_titleid=target_titleid, i=i, batches=batches)
-            try:
-                await msg.edit(embed=emb)
-            except discord.HTTPException as e:
-                logger.info(f"Error while editing msg: {e}", exc_info=True)
-
-            zipname = ZIPOUT_NAME[0] + f"_{batch.rand_str}" + f"_{i}" + ZIPOUT_NAME[1]
-
+                j += 1
+            await cleanup(C1ftp, workspace_folders, batch.entry, mount_paths)
+            self.logger.info(f"**{batch.printed}** re-regioned to {p} (batch {i}/{batches}).")
+            self.logger.info(f"Batch can be found at ```{batch.fInstance.download_encrypted_path}```.")
             if special_reregion and not extra_msg and j > 2:
                 extra_msg = (
                     "Make sure to remove the random string after and including '_' when you are going to copy that file to the console. "
                     "May be required if you re-regioned more than 1 save at once."
                 )
-
-            try:
-                await send_final(d_ctx, zipname, C1ftp.download_encrypted_path, shared_gd_folderid, extra_msg)
-                # 🔽 Add this: force replace "100%" with embrrpsf
-                emb = embrrpsf.copy()
-                emb.description = emb.description.format(savename=savefile.basename, printed=batch.printed, id=playstation_id or user_id, j=j, target_titleid=target_titleid, savecount=batch.savecount, i=i, batches=batches)
-                await msg.edit(embed=emb) 
-            except (GDapiError, discord.HTTPException, TaskCancelledError, FileError, TimeoutError) as e:
-                if isinstance(e, discord.HTTPException):
-                    e = BASE_ERROR_MSG
-                await error_handling(msg, e, workspace_folders, uploaded_file_paths, mount_paths, C1ftp)
-                logger.info(f"{e} - {ctx.user.name} - (expected)", exc_info=True)
-                await INSTANCE_LOCK_global.release(ctx.author.id)
-                return
-            except Exception as e:
-                await error_handling(msg, BASE_ERROR_MSG, workspace_folders, batch.entry, mount_paths, C1ftp)
-                logger.exception(f"{e} - {ctx.user.name} - (unexpected)")
-                await INSTANCE_LOCK_global.release(ctx.author.id)
-                return
-
-            await asyncio.sleep(1)
-            await cleanup(C1ftp, None, batch.entry, mount_paths)
+            self.logger.info(extra_msg)
             i += 1
-        await cleanup_simple(workspace_folders)
-        await INSTANCE_LOCK_global.release(ctx.author.id)
+        self.logger.info("Done!")
+        self.enable_buttons()
 
-def setup(bot: commands.Bot) -> None:
-    bot.add_cog(ReRegion(bot))
+    async def on_sample_save(self) -> None:
+        f = await app.native.main_window.create_file_dialog(FileDialog.OPEN)
+        if f:
+            self.in_sample_file = f[0]
+            self.sample_save_label.set_value(self.in_sample_file)
+
+    def on_sample_save_in(self, event: ValueChangeEventArguments) -> None:
+        self.in_sample_file = event.value
+
+    async def validation(self) -> bool:
+        t_v = await super().validation()
+        if not t_v:
+            return False
+        t_v, savepair = await check_save(self.in_sample_file)
+        if not t_v:
+            return False
+        self.sample_savepair = savepair
+        return True
+
+    def disable_buttons(self) -> None:
+        super().disable_buttons()
+        self.sample_save_button.disable()
+        self.sample_save_label.disable()
+
+    def enable_buttons(self) -> None:
+        super().enable_buttons()
+        self.sample_save_button.enable()
+        self.sample_save_label.enable()
