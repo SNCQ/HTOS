@@ -81,7 +81,7 @@ class ThreadButton(discord.ui.View):
         await interaction.response.send_message("Creating thread...", ephemeral=True)
 
         emb = embwlcom.copy()
-        emb.description = emb.description.format(user=interaction.user.name)
+        emb.title = emb.title.format(user=interaction.user.name)
         ids_to_remove = []
 
         try:
