@@ -9,7 +9,7 @@ from utils.constants import (
     BASE_ERROR_MSG
 )
 from utils.embeds import (
-    embinit, loadkeyset_emb,
+    embinit, loadkeyset_emb, Embed_t, Color,
     keyset_emb, embpingsuccess, embpingfail
 )
 from utils.helpers import ThreadButton, error_handling
@@ -18,10 +18,101 @@ from utils.orbis import keyset_to_fw
 from utils.instance_lock import INSTANCE_LOCK_global
 from utils.exceptions import WorkspaceError
 
+class HelpView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=60)  # Buttons expire after 60 seconds
+
+    @discord.ui.button(label="English", style=discord.ButtonStyle.primary)
+    async def english_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+        embed_en = discord.Embed(
+            title="Save Wizard Bot - Tutorial",
+            description="Welcome to the Save Wizard Bot! This bot is designed to assist you in modifying and managing your PS4 save games.",
+            color=Color.DEFAULT.value
+        )
+
+        embed_en.add_field(name="Core Commands:",
+                           value="🔄 `/resign` - Resign your PS4 save file to a new PlayStation account.\n"
+                                 "🌍 `/reregion` - Change the region of a save to match your game version.\n"
+                                 "🔓 `/decrypt` - Decrypt your save file for editing.\n"
+                                 "🔐 `/encrypt` - Re-encrypt your save file after making changes.\n",
+                                 #"🖼 `/change picture` - Customize the icon/picture associated with your save.\n"
+                                 #"✏️ `/change title` - Modify the title of your save file.",
+                           inline=False)
+
+        embed_en.add_field(name="Advanced Commands:",
+                           value="📜 `/quick codes` - Apply quick save modifications.\n"
+                                 "⚡ `/quick cheats` - Add pre-made cheat codes.\n"
+                                 "🔍 `/quick resign` - Quickly resign pre-stored save files.\n"
+                                 "🔑 `/sealed_key decrypt` - Decrypt sealed keys.\n"
+                                 "🔄 `/convert` - Convert PS4 save files to other platforms.\n"
+                                 "📂 `/sfo read` - Extract information from `param.sfo`.\n"
+                                 "✏️ `/sfo write` - Edit `param.sfo` parameters.",
+                           inline=False)
+
+        embed_en.add_field(name="Important Notes:",
+                           value="• Ensure your saves are properly backed up before modifications.\n"
+                                 "• Resigning and re-encryption are required for saves to work on new accounts.",
+                           inline=False)
+
+        embed_en.add_field(name="Need Help?",
+                           value="If you encounter any issues, open a ticket or type in the chat.\n",
+                           inline=False)
+
+        embed_en.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+        await interaction.response.edit_message(embed=embed_en, view=None)  # Removes buttons
+
+    @discord.ui.button(label="العربية", style=discord.ButtonStyle.primary)
+    async def arabic_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+        embed_ar = discord.Embed(
+            title="بوت سيف وزرد - شرح",
+            description="مرحبًا بك في بوت سيف وزرد على PS4! يساعدك هذا البوت في تعديل وإدارة التخزينات الخاصة بك.",
+            color=Color.DEFAULT.value
+        )
+
+        embed_ar.add_field(name="الأوامر الأساسية:",
+                           value="🔄 `/resign` - تحويل ملف التخزينة إلى حساب بلايستيشن جديد.\n"
+                                 "🌍 `/reregion` - تغيير الريجون لملف التخزينة.\n"
+                                 "🔓 `/decrypt` - فك تشفير ملف التخزينة للتعديل.\n"
+                                 "🔐 `/encrypt` - إعادة تشفير ملف التخزينة بعد التعديلات.\n",
+                                 #"🖼 `/change picture` - تخصيص صورة ملف الحفظ.\n"
+                                 #"✏️ `/change title` - تعديل عنوان ملف الحفظ."
+                           inline=False)
+
+        embed_ar.add_field(name="الأوامر المتقدمة:",
+                           value="⚡ `/quick cheats` - إضافة أكواد الغش الجاهزة.\n"
+                                 "📜 `/quick codes` - تطبيق تعديلات الحفظ السريعة.\n"
+                                 "🔍 `/quick resign` - تحويل التخزينات الجاهزه المخزنة مسبقًا.\n"
+                                 "🔑 `/sealed_key decrypt` - فك تشفير المفاتيح المغلقة.\n"
+                                 "🔄 `/convert` - تحويل تخزينة لعبة بلايستيشن 4 الى منصات اخرى.\n"
+                                 "📂 `/sfo read` - استخراج معلومات من `param.sfo`.\n"
+                                 "✏️ `/sfo write` - تعديل إعدادات `param.sfo`.",
+                           inline=False)
+
+        embed_ar.add_field(name="ملاحظات هامة:",
+                           value="• تأكد من عمل نسخة احتياطية للتخزينة قبل التعديل.\n"
+                                 "• لازم تحول التخزينة كل مره عشان تشتغل على الحسابات الجديدة.",
+                           inline=False)
+
+        embed_ar.add_field(name="تحتاج مساعدة؟",
+                           value="إذا واجهت اي مشكلة، افتح تذكرة او اكتب في الشات.\n",
+                           inline=False)
+
+        embed_ar.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+        await interaction.response.edit_message(embed=embed_ar, view=None)  # Removes buttons
+    
 class Misc(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+    @discord.slash_command(description="Display bot commands and information.")
+    async def help(self, ctx: discord.ApplicationContext) -> None:
+        embed = discord.Embed(
+            title="Choose a Language | اختر لغة",
+            description="Please select your language to display the instructure using the buttons below.\nيرجى اختيار اللغة لظهور التعليمات باستخدام الأزرار أدناه.",
+            color=Color.DEFAULT.value
+        )
 
+        view = HelpView()
+        await ctx.respond(embed=embed, view=view, ephemeral=False)
     info_group = discord.SlashCommandGroup("info")
 
     @info_group.command(description="Display the maximum firmware/keyset the hoster's console can mount/unmount a save from.")
