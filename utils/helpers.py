@@ -198,9 +198,10 @@ async def download_attachment(attachment: discord.Attachment, folderpath: str, f
         raise FileError("Invalid file!")
 
     try:
+        # NEW discord.py method (read full file)
+        data = await attachment.read()
         async with aiofiles.open(filepath, "wb") as out:
-            async for chunk in attachment.read_chunked(chunksize=GENERAL_CHUNKSIZE):
-                await out.write(chunk)
+                await out.write(data)
     except asyncio.TimeoutError:
         raise TimeoutError("TIMED OUT!")
     except aiohttp.ClientError:
