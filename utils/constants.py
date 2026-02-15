@@ -115,7 +115,7 @@ else:
     psnawp = None
 
 # BOT INITIALIZATION
-activity = discord.Activity(type=discord.ActivityType.listening, name="HTOS database")
+activity = discord.Activity(type=discord.ActivityType.listening, name="Save Wizard Bot - Hosted By SNCQ")
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -266,3 +266,4 @@ CON_FAIL_MSG = "PS4 not connected!"
 # EMBEDS
 EMBED_DESC_LIM = 4096
 EMBED_FIELD_LIM = 25
+
