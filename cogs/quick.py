@@ -20,7 +20,7 @@ from utils.constants import (
 from utils.embeds import (
     emb_upl_savegame, embTimedOut, working_emb, embExit,
     embresb, embresbs, embRdone, embLoading, embApplied,
-    embqcCompleted, embchLoading
+    embqcCompleted, embchLoading, embresbsf
 )
 from utils.workspace import init_workspace, make_workspace, cleanup, cleanup_simple, list_stored_saves
 from utils.helpers import (
@@ -154,6 +154,10 @@ class Quick(commands.Cog):
 
         try:
             await send_final(d_ctx, zipname, C1ftp.download_encrypted_path, shared_gd_folderid)
+            # 🔽 Add this: force replace "100%" with embresbsf
+            emb = embresbsf.copy()
+            emb.description = emb.description.format(printed=batch.printed, savename=savefile.basename, id=playstation_id or user_id, i=i, savecount=batch.savecount)
+            await msg.edit(embed=emb)
         except (GDapiError, discord.HTTPException, TaskCancelledError, FileError, TimeoutError) as e:
             if isinstance(e, discord.HTTPException):
                 e = BASE_ERROR_MSG
