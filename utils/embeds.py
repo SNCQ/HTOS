@@ -414,6 +414,13 @@ embencComplete = discord.Embed(
 )
 embencComplete.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
+embmenCompletef = discord.Embed(
+    title="Encryption Processs: Successful",
+    description="Encrypted **{dec_print}** into **{savename}** for **{id}**.",
+    colour=Color.DEFAULT.value
+)
+embmenCompletef.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
+
 keyset_emb = discord.Embed(
     title="Success",
     description="Keyset: {keyset}\nFW: {fw}",
