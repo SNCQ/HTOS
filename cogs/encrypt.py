@@ -17,7 +17,7 @@ from utils.constants import (
     logger
 )
 from utils.embeds import (
-    emb14, cancel_notify_emb, embmo, embSceSys, embmidComplete, embencComplete
+    emb14, cancel_notify_emb, embmo, embSceSys, embmidComplete, embencComplete, embmenCompletef
 )
 from utils.workspace import init_workspace, make_workspace, cleanup, cleanup_simple
 from utils.extras import completed_print
@@ -194,6 +194,9 @@ class Encrypt(commands.Cog):
 
             try:
                 await send_final(d_ctx, zipname, C1ftp.download_encrypted_path, shared_gd_folderid)
+                emb = embmenCompletef.copy()
+                emb.description = emb.description.format(dec_print=dec_print, printed=batch.printed, savename=savefile.basename, id=playstation_id or user_id, j=j, savecount=batch.savecount, i=i, batches=batches)
+                await msg.edit(embed=emb)
             except (GDapiError, discord.HTTPException, TaskCancelledError, FileError, TimeoutError) as e:
                 if isinstance(e, discord.HTTPException):
                     e = BASE_ERROR_MSG
