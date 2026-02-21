@@ -2,8 +2,6 @@ import re
 import aiofiles
 import aiofiles.os
 import os
-import discord
-import asyncio
 import struct
 import shutil
 from enum import Enum
@@ -13,15 +11,12 @@ from data.crypto.helpers import extra_reregion_pre, extra_reregion_pre_needs_fol
 from network.ftp_functions import FTPps
 from network.socket_functions import SocketPS
 from utils.constants import (
-    MOUNT_LOCATION, FILE_LIMIT_DISCORD, SCE_SYS_CONTENTS, SYS_FILE_MAX, SEALED_KEY_ENC_SIZE, MAX_FILENAME_LEN,
-    PS_UPLOADDIR, MAX_PATH_LEN, RANDOMSTRING_LENGTH, MANDATORY_SCE_SYS_CONTENTS, SCE_SYS_NAME,
+    MOUNT_LOCATION, MANDATORY_SCE_SYS_CONTENTS, SCE_SYS_NAME
 )
-from utils.embeds import embfn, embFileLarge, embnvSys, embpn, embnvBin
 from utils.extras import obtain_savenames, completed_print
 from utils.type_helpers import uint32, uint64, utf_8, utf_8_s, TypeCategory
 from utils.workspace import enumerate_files
 from utils.exceptions import OrbisError
-from utils.conversions import bytes_to_mb
 
 SFO_MAGIC = 0x46535000
 SFO_VERSION = 0x0101
@@ -225,7 +220,7 @@ class SFOContextParam:
 class SFOContext:
     """Instance creator for param.sfo r/w."""
     def __init__(self) -> None:
-        self.params = []
+        self.params: list[SFOContextParam] = []
 
     def sfo_read(self, sfo: bytearray) -> None:
         if len(sfo) < 20:
@@ -274,7 +269,10 @@ class SFOContext:
         header = SFOHeader(SFO_MAGIC, SFO_VERSION, 20 + num_params * 16, (20 + num_params * 16 + key_table_size) + 2, num_params)
 
         try:
-            struct.pack_into("<IIIII", sfo, 0, header.magic, header.version, header.key_table_offset, header.data_table_offset, header.num_entries)
+            struct.pack_into(
+                "<IIIII",
+                sfo, 0, header.magic, header.version, header.key_table_offset, header.data_table_offset, header.num_entries
+            )
         except struct.error:
             raise OrbisError("Failed to generate a param.sfo!")
 
@@ -284,7 +282,11 @@ class SFOContext:
             index_table = SFOIndexTable(key_offset, param.format, param.length, param.max_length, data_offset)
 
             try:
-                struct.pack_into("<HHIII", sfo, index_offset, index_table.key_offset, index_table.param_format, index_table.param_length, index_table.param_max_length, index_table.data_offset)
+                struct.pack_into(
+                    "<HHIII",
+                    sfo, index_offset, index_table.key_offset, index_table.param_format,
+                    index_table.param_length, index_table.param_max_length, index_table.data_offset
+                )
             except struct.error:
                 raise OrbisError("Failed to generate a param.sfo!")
 
@@ -305,11 +307,11 @@ class SFOContext:
         return sfo
 
     def sfo_patch_parameter(self, parameter: str, new_data: str | int) -> None:
-        param: SFOContextParam = next((param for param in self.params if param.key == parameter), None)
+        param: SFOContextParam | None = next((param for param in self.params if param.key == parameter), None)
         if not param:
             raise OrbisError(f"Invalid parameter: {parameter}!")
 
-        param_type: uint32 | uint64 | utf_8 | utf_8_s = SFO_TYPES.get(parameter)
+        param_type: uint32 | uint64 | utf_8 | utf_8_s | None = SFO_TYPES.get(parameter)
         if not param_type:
             raise OrbisError(f"Unsupported parameter: {parameter}!")
 
@@ -318,17 +320,20 @@ class SFOContext:
                 ctx = uint32(new_data, "little")
             case uint64():
                 ctx = uint64(new_data, "little")
-            case utf_8():
-                ctx = utf_8(new_data)
             case utf_8_s():
                 ctx = utf_8_s(new_data)
+            case utf_8():
+                ctx = utf_8(new_data)
 
         max_len = param.max_length | param.actual_length
 
         if ctx.CATEGORY == TypeCategory.CHARACTER:
             ctx: utf_8 | utf_8_s
             if ctx.bytelen >= max_len:
-               raise OrbisError(f"The parameter: {parameter} reached the max length it has of {max_len}! Remember last byte is reserved for null termination for this parameter.")
+               raise OrbisError(
+                    f"The parameter: {parameter} reached the max length it has of {max_len}! "
+                    "Remember last byte is reserved for null termination for this parameter."
+                )
             v = ctx.to_cstr()
             l = len(v)
         else:
@@ -340,12 +345,11 @@ class SFOContext:
         param.length = l
         param.value = v
 
-    def sfo_get_param_value(self, parameter: str) -> bytes:
-        param: SFOContextParam = next((param for param in self.params if param.key == parameter), None)
-        if param:
-            return param.value
-        else:
+    def sfo_get_param_value(self, parameter: str) -> bytearray:
+        param: SFOContextParam | None = next((param for param in self.params if param.key == parameter), None)
+        if not param:
             raise OrbisError(f"Invalid parameter: {parameter}!")
+        return param.value
 
     def sfo_get_param_data(self) -> list[dict[str, str | int | bytearray]]:
         param_data = []
@@ -418,101 +422,6 @@ def handle_accid(user_id: str) -> str:
     user_id = user_id.zfill(16) # pad to 16 length with zeros
 
     return user_id
-
-async def check_saves(
-          ctx: discord.ApplicationContext | discord.Message,
-          attachments: list[discord.message.Attachment],
-          ps_save_pair_upload: bool,
-          sys_files: bool,
-          ignore_filename_check: bool,
-          savesize: int | None = None
-        ) -> list[discord.message.Attachment]:
-
-    """Handles file checks universally through discord upload."""
-    valid_files = []
-    total_count = 0
-    if ps_save_pair_upload:
-        valid_files = await save_pair_check(ctx, attachments)
-        return valid_files
-
-    for attachment in attachments:
-        if len(attachment.filename) > MAX_FILENAME_LEN and not ignore_filename_check:
-            emb = embfn.copy()
-            emb.description = emb.description.format(filename=attachment.filename, len=len(attachment.filename), max=MAX_FILENAME_LEN)
-            await ctx.edit(embed=emb)
-            await asyncio.sleep(1)
-
-        elif attachment.size > FILE_LIMIT_DISCORD:
-            emb = embFileLarge.copy()
-            emb.description = emb.description.format(filename=attachment.filename, max=bytes_to_mb(FILE_LIMIT_DISCORD))
-            await ctx.edit(embed=emb)
-            await asyncio.sleep(1)
-
-        elif sys_files and (attachment.filename not in SCE_SYS_CONTENTS or attachment.size > SYS_FILE_MAX):
-            emb = embnvSys.copy()
-            emb.description = emb.description.format(filename=attachment.filename)
-            await ctx.edit(embed=emb)
-            await asyncio.sleep(1)
-
-        elif savesize is not None and total_count > savesize:
-            raise OrbisError(f"The files you are uploading for this save exceeds the savesize {bytes_to_mb(savesize)} MB!")
-
-        else:
-            total_count += attachment.size
-            valid_files.append(attachment)
-
-    return valid_files
-
-async def save_pair_check(ctx: discord.ApplicationContext | discord.Message, attachments: list[discord.message.Attachment]) -> list[discord.message.Attachment]:
-    """Makes sure the save pair through discord upload is valid."""
-    valid_attachments_check1 = []
-    for attachment in attachments:
-        filename = attachment.filename + f"_{'X' * RANDOMSTRING_LENGTH}"
-        filename_len = len(filename)
-        path_len = len(PS_UPLOADDIR + "/" + filename + "/")
-
-        if filename_len > MAX_FILENAME_LEN:
-            emb = embfn.copy()
-            emb.description = emb.description.format(filename=attachment.filename, len=filename_len, max=MAX_FILENAME_LEN)
-            await ctx.edit(embed=emb)
-            await asyncio.sleep(1)
-
-        elif path_len > MAX_PATH_LEN:
-            emb = embpn.copy()
-            emb.description = emb.description.format(filename=attachment.filename, len=path_len, max=MAX_PATH_LEN)
-            await ctx.edit(embed=emb)
-            await asyncio.sleep(1)
-
-        elif attachment.filename.endswith(".bin"):
-            if attachment.size != SEALED_KEY_ENC_SIZE:
-                emb = embnvBin.copy()
-                emb.description = emb.description.format(filename=attachment.filename, size=SEALED_KEY_ENC_SIZE)
-                await ctx.edit(embed=emb)
-                await asyncio.sleep(1)
-            else:
-                valid_attachments_check1.append(attachment)
-        else:
-            if attachment.size > FILE_LIMIT_DISCORD:
-                emb = embFileLarge.copy()
-                emb.description = emb.description.format(filename=attachment.filename, max=bytes_to_mb(FILE_LIMIT_DISCORD))
-                await ctx.edit(embed=emb)
-                await asyncio.sleep(1)
-            else:
-                valid_attachments_check1.append(attachment)
-
-    valid_attachments_final = []
-    for attachment in valid_attachments_check1:
-        if attachment.filename.endswith(".bin"): # look for corresponding file
-            for attachment_nested in valid_attachments_check1:
-                filename_nested = attachment_nested.filename
-                if filename_nested == attachment.filename: continue
-
-                elif filename_nested == os.path.splitext(attachment.filename)[0]:
-                    valid_attachments_final.append(attachment)
-                    valid_attachments_final.append(attachment_nested)
-                    break
-
-    return valid_attachments_final
 
 async def sfo_ctx_create(sfo_path: str) -> SFOContext:
     async with aiofiles.open(sfo_path, "rb") as sfo:
