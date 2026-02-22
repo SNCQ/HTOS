@@ -577,8 +577,8 @@ embrrdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 embrrpsf = discord.Embed(
     title="Re-regioning (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تغيير الريجون: ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "- **{printed}** re-regioned & resigned to **{id}** - (**{target_titleid}**).\n"
-        "- (**{target_titleid}**) - **{id}** تم تحويلها و تغيير الرجون الى **{printed}**"
+        "- **`{printed}`** re-regioned & resigned to **`{id}`** - (**`{target_titleid}`**).\n"
+        "- (**`{target_titleid}`**) - **`{id}`** تم تحويلها و تغيير الرجون الى **`{printed}`**"
     ),
     colour=Color.DEFAULT.value
 )
@@ -618,12 +618,12 @@ embRbdone = discord.Embed(
 embRbdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embressf = discord.Embed(
-    title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
+    title="Resigning process: Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "- **{printed}** resigned to **{id}**.\n"
-        "- **{id}** تم تحويلها الى **{printed}**."
+        "- **`{printed}`** resigned to **`{id}`**.\n"
+        "- **`{id}`** تم تحويلها الى **`{printed}`**."
     ),
-    colour=Color.DEFAULT.value
+    colour=0x00ffcc
 )
 embressf.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
@@ -826,7 +826,7 @@ embdecFormat = discord.Embed(
 embdecFormat.set_footer(text="If you want to use the file in a save editor, choose 'Decrypted'!")
 
 embwlcom = discord.Embed(
-    title="Welcome {user} | اهلاً و سهلاً يا {user}",
+    title="Welcome **`{user}`**\nاهلاً و سهلاً يا **`{user}`**",
     description=(
                 f"📌 **How to use the bot:**\n"
                 f"- Type **`/`** and select a command to begin.\n\n"
