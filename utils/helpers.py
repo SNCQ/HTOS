@@ -438,7 +438,7 @@ async def upload2(
         await message.delete() # delete afterwards for reliability
 
     elif message.content == "EXIT":
-        raise TimeoutError("EXITED!")
+        raise TimeoutError("- Exited!\n- تم الخروج!")
 
     else:
         try:
@@ -487,7 +487,7 @@ async def upload1(d_ctx: DiscordContext, save_location: str) -> str:
             await d_ctx.msg.edit(embed=emb)
 
     elif message.content == "EXIT":
-        raise TimeoutError("EXITED!")
+        raise TimeoutError("- Exited!\n- تم الخروج!")
 
     else:
         try:
@@ -565,7 +565,7 @@ async def upload2_special(d_ctx: DiscordContext, save_location: str, max_files: 
         await message.delete()
 
     elif message.content == "EXIT":
-        raise TimeoutError("EXITED!")
+        raise TimeoutError("- Exited!\n- تم الخروج!")
 
     else:
         try:
@@ -592,7 +592,7 @@ async def psusername(ctx: discord.ApplicationContext, username: str) -> str:
         await ctx.respond(embed=e)
         res = await wait_for_msg(ctx, accid_input_check, embnt, delete_response=True)
         if res.content == "EXIT":
-            raise PSNIDError("EXITED!")
+            raise PSNIDError("- Exited!\n- تم الخروج!")
         return res.content
 
     user_id = ""
