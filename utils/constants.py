@@ -226,7 +226,7 @@ SHARED_GD_LINK_DESC = "A link to your shared Google Drive folder, if you want th
 
 BASE_ERROR_MSG = "An unexpected server-side error has occurred! Try again, and if it occurs multiple times, please contact the host."
 
-BLACKLIST_MESSAGE = "YOU HAVE BEEN DENIED!"
+BLACKLIST_MESSAGE = "Your access have been revoked!\nتم سحب صلاحيتك!"
 
 ZIPOUT_NAME = ("PS4", ".zip") # name, ext
 
@@ -267,4 +267,5 @@ CON_FAIL_MSG = "PS4 not connected!"
 # EMBEDS
 EMBED_DESC_LIM = 4096
 EMBED_FIELD_LIM = 25
+
 
