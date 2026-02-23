@@ -727,7 +727,7 @@ class GDapi:
         filecount = len(files)
         uploaded_file_paths = []
         if filecount == 0:
-            raise GDapiError("Invalid files uploaded, or no files found!")
+            raise GDapiError("- Invalid files uploaded, or no files found!\n- الملفات غير صحيحة او لا توجد ملفات!")
         elif filecount > max_files:
             raise GDapiError(f"Amount of files cannot exceed {max_files}!")
         elif total_filesize > self.TOTAL_SIZE_LIMIT:
@@ -799,7 +799,7 @@ class GDapi:
         files, total_filesize = await self.list_dir(ctx, folder_id, None, False, True, mounted_len_checks=True)
         filecount = len(files)
         if filecount == 0:
-            raise GDapiError("Invalid files uploaded, or no files found!")
+            raise GDapiError("- Invalid files uploaded, or no files found!\n- الملفات غير صحيحة او لا توجد ملفات!")
         elif filecount > max_files:
             raise GDapiError(f"Amount of files cannot exceed {max_files}!")
         elif total_filesize > self.TOTAL_SIZE_LIMIT:
