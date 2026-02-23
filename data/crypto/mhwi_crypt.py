@@ -834,7 +834,7 @@ class Crypt_Mhwi:
 
                 struct.pack_into("<I", result, i * 4, output_val)
 
-                # Update uVar9 for next iteration
+                # Update crc_salt for next iteration
                 byte_sum = ((crc & 0xFF) + ((crc >> 8) & 0xFF) +
                            ((crc >> 16) & 0xFF) + (crc >> 24) + 1)
                 crc_salt = (crc_salt + byte_sum) & 0xFF_FF_FF_FF
