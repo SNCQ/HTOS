@@ -401,7 +401,7 @@ async def upload2(
     message = await wait_for_msg(d_ctx.ctx, upl_check, embUtimeout, timeout=UPLOAD_TIMEOUT)
 
     if len(message.attachments) > max_files:
-        raise FileError(f"Attachments uploaded cannot exceed {max_files}!")
+        raise FileError(f"- Attachments uploaded cannot exceed {max_files}!\n- عدد الملفات المرفوعه يجب ان لا تتعدى {max_files}!")
 
     elif len(message.attachments) >= 1:
         attachments = message.attachments
@@ -411,7 +411,7 @@ async def upload2(
         valid_attachments = await check_saves(d_ctx.msg, attachments, ps_save_pair_upload, sys_files, ignore_filename_check, savesize)
         filecount = len(valid_attachments)
         if filecount == 0:
-            raise FileError("Invalid files uploaded, or no files found!")
+            raise FileError("- Invalid files uploaded, or no files found!\n- الملفات غير صحيحة او لا توجد ملفات!")
 
         await d_ctx.msg.edit(embed=cancel_notify_emb)
         await asyncio.sleep(1)
@@ -510,7 +510,7 @@ async def upload2_special(d_ctx: DiscordContext, save_location: str, max_files: 
     message = await wait_for_msg(d_ctx.ctx, upl_check, embUtimeout, timeout=UPLOAD_TIMEOUT)
 
     if len(message.attachments) > max_files:
-        raise FileError(f"Attachments uploaded cannot exceed {max_files}!")
+        raise FileError(f"- Attachments uploaded cannot exceed {max_files}!\n- عدد الملفات المرفوعه يجب ان لا تتعدى {max_files}!")
 
     elif len(message.attachments) >= 1:
         attachments = message.attachments
