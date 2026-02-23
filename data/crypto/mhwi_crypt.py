@@ -999,7 +999,7 @@ class Crypt_Mhwi:
         files = await CC.obtain_files(folderpath, Crypt_Mhwi.EXCLUDE)
         files = Crypt_Mhwi.files_check(files)
         for filepath in files:
-            async with aiofiles.open(filepath) as savegame:
+            async with aiofiles.open(filepath, "rb") as savegame:
                 await savegame.seek(0x48A)
                 magic = await savegame.read(2)
             if magic != b"\x00\x00":
@@ -1010,7 +1010,7 @@ class Crypt_Mhwi:
         if not Crypt_Mhwi.file_check(filepath):
             return
 
-        async with aiofiles.open(filepath) as savegame:
+        async with aiofiles.open(filepath, "rb") as savegame:
             await savegame.seek(0x48A)
             magic = await savegame.read(2)
         if magic == b"\x00\x00":
