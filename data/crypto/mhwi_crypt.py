@@ -738,115 +738,106 @@ class Crypt_Mhwi:
             await self.ext_write(chunk_off, chunk)
 
         async def generate_checksum(self, offset: int, length: int, saveslot: int) -> bytes:
-            param_1_offset = 0xC0490023
+            seed = 0xC0490023
 
-            # Initialize auStack_68 array
-            auStack_68 = [
+            # Initialize constants array
+            constants = [
                 0x67308D52,
                 0x26AE9DAB,
                 0x701D5D68,
-                param_1_offset
+                seed
             ]
 
-            # Initialize auStack_58 array using param_5
-            auStack_58 = [0] * 8
-            auStack_58[0] = 0x394E4E79 ^ auStack_68[saveslot & 3]
-            auStack_58[4] = auStack_68[saveslot & 3] ^ 0x137E601C
-            auStack_58[1] = 0x681BA6CF ^ auStack_68[(saveslot + 1) & 3]
-            auStack_58[5] = auStack_68[(saveslot + 1) & 3] ^ 0x4BF0CF23
-            auStack_58[7] = auStack_68[(saveslot - 1) & 3] ^ 0x5D9E0742
-            auStack_58[3] = auStack_68[(saveslot - 1) & 3] ^ 0x4BF0CF23
-            auStack_58[2] = 0x671A5459 ^ auStack_68[(saveslot + 2) & 3]
-            auStack_58[6] = auStack_68[(saveslot + 2) & 3] ^ 0x7C8B3AF0
+            # Initialize slot_constants array using saveslot
+            slot_constants = [0] * 8
+            slot_constants[0] = 0x394E4E79 ^ constants[saveslot & 3]
+            slot_constants[4] = constants[saveslot & 3] ^ 0x137E601C
+            slot_constants[1] = 0x681BA6CF ^ constants[(saveslot + 1) & 3]
+            slot_constants[5] = constants[(saveslot + 1) & 3] ^ 0x4BF0CF23
+            slot_constants[7] = constants[(saveslot - 1) & 3] ^ 0x5D9E0742
+            slot_constants[3] = constants[(saveslot - 1) & 3] ^ 0x4BF0CF23
+            slot_constants[2] = 0x671A5459 ^ constants[(saveslot + 2) & 3]
+            slot_constants[6] = constants[(saveslot + 2) & 3] ^ 0x7C8B3AF0
 
             # Calculate positions using float arrays
-            uVar8 = length >> 3
-            fVar15 = float(uVar8)
+            length_int = length >> 3
+            length_float = float(length_int)
 
-            auStack_84 = [0] * 7
+            crc_lengths = [0] * 7
 
             for i in range(7):
                 idx = i + 1
                 if idx < 8:
-                    s_val = auStack_58[idx]
+                    s_val = slot_constants[idx]
                     s_box_val = Crypt_Mhwi.BLOWFISH_SBOX[s_val & 0xFFF]
                     combined = (s_val + s_box_val) & 0xFFF
                     float_val = Crypt_Mhwi.FLOATS[combined]
-                    auStack_84[i] = int((float_val - 0.5) * fVar15) + uVar8 * (idx + 1)
+                    crc_lengths[i] = int((float_val - 0.5) * length_float) + length_int * (idx + 1)
 
             # Set last position
-            auStack_84[6] = length
+            crc_lengths[6] = length
 
             # Compute CRC values for each segment
-            auStack_a8 = [0] * 8
+            partial_crcs = [0] * 8
 
             # First segment
-            uStack_88 = int((Crypt_Mhwi.FLOATS[(Crypt_Mhwi.BLOWFISH_SBOX[auStack_58[0] & 0xFFF] +
-                        auStack_58[0]) & 0xFFF] - 0.5) * fVar15) + uVar8
+            pos = int((Crypt_Mhwi.FLOATS[(Crypt_Mhwi.BLOWFISH_SBOX[slot_constants[0] & 0xFFF] +
+                        slot_constants[0]) & 0xFFF] - 0.5) * length_float) + length_int
 
-            crc32 = self.create_ctx_crc32(uint32(auStack_58[0] ^ 0xFF_FF_FF_FF, "little", const=True))
-            await self.checksum(crc32, offset, offset + uStack_88)
+            crc32 = self.create_ctx_crc32(uint32(slot_constants[0] ^ 0xFF_FF_FF_FF, "little", const=True))
+            await self.checksum(crc32, offset, offset + pos)
             # get crc32 digest
-            auStack_a8[0] = self._get_ctx(crc32).attr.value ^ 0xFF_FF_FF_FF
+            partial_crcs[0] = self._get_ctx(crc32).attr.value ^ 0xFF_FF_FF_FF
 
             # Remaining segments
-            prev_pos = uStack_88
+            prev_pos = pos
             for i in range(1, 8):
-                cur_pos = auStack_84[i - 1] if i < 7 else length
-                init_crc = auStack_a8[i - 1] ^ auStack_58[i]
+                cur_pos = crc_lengths[i - 1] if i < 7 else length
+                init_crc = partial_crcs[i - 1] ^ slot_constants[i]
                 crc32 = self.create_ctx_crc32(uint32(init_crc ^ 0xFF_FF_FF_FF, "little", const=True))
                 await self.checksum(crc32, offset + prev_pos, offset + cur_pos)
                 # get crc32 digest
-                auStack_a8[i] = self._get_ctx(crc32).attr.value ^ 0xFF_FF_FF_FF
+                partial_crcs[i] = self._get_ctx(crc32).attr.value ^ 0xFF_FF_FF_FF
                 prev_pos = cur_pos
 
             # Combine results
-            auStack_c8 = [0] * 4
-            for i in range(4):
-                auStack_c8[i] = (auStack_a8[i] ^ auStack_58[i] ^
-                                 auStack_68[3] ^ auStack_a8[7])
-
-            uStack_b8 = auStack_58[4] ^ auStack_a8[7] ^ auStack_a8[4] ^ auStack_68[3]
-            uStack_b4 = auStack_58[5] ^ auStack_a8[7] ^ auStack_a8[5] ^ auStack_68[3]
-            uStack_b0 = auStack_a8[6] ^ auStack_68[3] ^ auStack_58[6] ^ auStack_a8[7]
-            uStack_ac = auStack_a8[7] ^ auStack_68[3] ^ auStack_58[7]
+            hash_lookup = [0] * 8
+            for i in range(7):
+                hash_lookup[i] = partial_crcs[i] ^ slot_constants[i] ^ constants[3] ^ partial_crcs[7]
+            hash_lookup[7] = partial_crcs[7] ^ slot_constants[7] ^ constants[3]
 
             # Compute final CRC over all intermediate values
-            uVar8 = auStack_68[3] ^ auStack_68[saveslot]
+            crc = constants[3] ^ constants[saveslot]
 
-            # Process auStack_58 values
-            for val in auStack_58:
+            # Process slot_constants values
+            for val in slot_constants:
                 for byte_idx in range(4):
                     byte_val = (val >> (byte_idx * 8)) & 0xFF
-                    uVar8 = (uVar8 >> 8) ^ Crypt_Mhwi.CRC_TABLE[byte_val ^ (uVar8 & 0xFF)]
+                    crc = (crc >> 8) ^ Crypt_Mhwi.CRC_TABLE[byte_val ^ (crc & 0xFF)]
 
-            # Process auStack_a8 values
-            for val in auStack_a8:
+            # Process partial_crcs values
+            for val in partial_crcs:
                 val_swapped = self.ES32_int(val)
                 for byte_idx in range(4):
                     byte_val = (val_swapped >> ((3 - byte_idx) * 8)) & 0xFF
-                    uVar8 = (uVar8 >> 8) ^ Crypt_Mhwi.CRC_TABLE[byte_val ^ (uVar8 & 0xFF)]
-
-            uVar10 = uVar8
+                    crc = (crc >> 8) ^ Crypt_Mhwi.CRC_TABLE[byte_val ^ (crc & 0xFF)]
 
             # Generate final 0x200 bytes
             result = bytearray(0x200)
-            uVar9 = uVar10
-
-            combined_stack = auStack_c8 + [uStack_b8, uStack_b4, uStack_b0, uStack_ac]
+            crc_salt = crc
 
             for i in range(0x200 // 4):
-                s_box_val = Crypt_Mhwi.BLOWFISH_SBOX[uVar9 & 0xFFF]
+                s_box_val = Crypt_Mhwi.BLOWFISH_SBOX[crc_salt & 0xFFF]
                 stack_idx = (s_box_val + saveslot) & 7
 
-                output_val = s_box_val ^ combined_stack[stack_idx] ^ param_1_offset
+                output_val = s_box_val ^ hash_lookup[stack_idx] ^ seed
 
                 struct.pack_into("<I", result, i * 4, output_val)
 
                 # Update uVar9 for next iteration
-                byte_sum = ((uVar10 & 0xFF) + ((uVar10 >> 8) & 0xFF) +
-                           ((uVar10 >> 16) & 0xFF) + (uVar8 >> 24) + 1)
-                uVar9 = (uVar9 + byte_sum) & 0xFF_FF_FF_FF
+                byte_sum = ((crc & 0xFF) + ((crc >> 8) & 0xFF) +
+                           ((crc >> 16) & 0xFF) + (crc >> 24) + 1)
+                crc_salt = (crc_salt + byte_sum) & 0xFF_FF_FF_FF
 
             return bytes(result)
 
@@ -865,9 +856,8 @@ class Crypt_Mhwi:
 
             # Generate remaining 508 bytes
             for i in range(4, 0x200, 4):
-                uVar1 = (0xC0490023 + iVar2) & 0xFF_FF_FF_FF
+                table_offset = (0xC0490023 + iVar2) & 0xFFF
                 iVar2 = (iVar2 + iVar4) & 0xFF_FF_FF_FF
-                table_offset = uVar1 & 0xFFF
                 salt[i:i + 4] = struct.pack("<I", Crypt_Mhwi.BLOWFISH_SBOX[table_offset] ^ 0x4BF0CF23 ^ key_salt)
 
             return bytes(salt)
@@ -945,54 +935,62 @@ class Crypt_Mhwi:
             return key_length
 
     @staticmethod
-    async def pre(filepath: str) -> bytes:
-        s_start = 0x600488
-        s_end = 0x6010C0
-        async with CC(filepath, in_place=False) as cc:
-            await cc.r_stream.seek(s_start)
-            section = await cc.r_stream.read(s_end - s_start)
-
-            while await cc.read(stop_off=s_start):
-                await cc.w_stream.write(cc.chunk)
-            cc.set_ptr(s_end)
-            while await cc.read():
-                await cc.w_stream.write(cc.chunk)
-
-        return section
-
-    @staticmethod
-    async def post(filepath: str, section: bytes) -> None:
-        s_start = 0x600488
-        async with CC(filepath, in_place=False) as cc:
-            while await cc.read(stop_off=s_start):
-                await cc.w_stream.write(cc.chunk)
-            await cc.w_stream.write(section)
-            while await cc.read():
-                await cc.w_stream.write(cc.chunk)
-
-    @staticmethod
     async def decrypt_file(filepath: str) -> None:
         if not Crypt_Mhwi.file_check(filepath):
             return
 
-        section = await Crypt_Mhwi.pre(filepath)
+        start = 0x600488
+        dest = 0x61D4C8
+        size = 3128
+        async with CC(filepath, in_place=False) as cc:
+            await cc.r_stream.seek(start)
+            buf = await cc.r_stream.read(size)
+
+            while await cc.read(stop_off=start):
+                await cc.w_stream.write(cc.chunk)
+
+            cc.set_ptr(start + size)
+            while await cc.read(stop_off=dest + size):
+                await cc.w_stream.write(cc.chunk)
+
+            await cc.w_stream.write(buf)
+
+            while await cc.read():
+                await cc.w_stream.write(cc.chunk)
+
         async with Crypt_Mhwi.Mhwi(filepath) as cc:
             await cc.decrypt_region(0x488, 0x2098C0)
             await cc.decrypt_region(0x209F48, 0x2098C0)
             await cc.decrypt_region(0x413A08, 0x2098C0)
-        await Crypt_Mhwi.post(filepath, section)
 
     @staticmethod
     async def encrypt_file(filepath: str) -> None:
         if not Crypt_Mhwi.file_check(filepath):
             return
 
-        section = await Crypt_Mhwi.pre(filepath)
         async with Crypt_Mhwi.Mhwi(filepath) as cc:
             await cc.encrypt_region(0x488, 0x2098C0, 0)
             await cc.encrypt_region(0x209F48, 0x2098C0, 1)
             await cc.encrypt_region(0x413A08, 0x2098C0, 2)
-        await Crypt_Mhwi.post(filepath, section)
+
+        start = 0x600488
+        dest = 0x61D4C8
+        size = 3128
+        async with CC(filepath, in_place=False) as cc:
+            await cc.r_stream.seek(dest)
+            buf = await cc.r_stream.read(size)
+
+            while await cc.read(stop_off=start):
+                await cc.w_stream.write(cc.chunk)
+
+            await cc.w_stream.write(buf)
+
+            while await cc.read(stop_off=dest):
+                await cc.w_stream.write(cc.chunk)
+
+            cc.set_ptr(dest + size)
+            while await cc.read():
+                await cc.w_stream.write(cc.chunk)
 
     @staticmethod
     async def check_dec_ps(folderpath: str) -> None:
