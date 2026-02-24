@@ -181,7 +181,7 @@ async def wait_for_msg(ctx: discord.ApplicationContext, check: Callable[[discord
         if embed is not None:
             await ctx.edit(embed=embed)
             await asyncio.sleep(3)
-        raise TimeoutError("TIMED OUT!")
+        raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
     return response
 
 def get_name_attachment(attachment: discord.Attachment) -> str:
@@ -207,7 +207,7 @@ async def download_attachment(attachment: discord.Attachment, folderpath: str, f
         async with aiofiles.open(filepath, "wb") as out:
                 await out.write(data)
     except asyncio.TimeoutError:
-        raise TimeoutError("TIMED OUT!")
+        raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
     except aiohttp.ClientError:
         raise FileError("Failed to download file.")
     except OSError as e:
@@ -269,7 +269,7 @@ async def task_handler(d_ctx: DiscordContext, ordered_tasks: list[Callable[[], A
                 await cancel_task
             except TimeoutError as e:
                 raise TaskCancelledError(e)
-            raise TaskCancelledError("CANCELLED!")
+            raise TaskCancelledError("- Cancelled!\n- تم الإلغاء!
 
     cancel_task.cancel()
     try:
@@ -457,7 +457,7 @@ async def upload2(
 
         except asyncio.TimeoutError:
             await d_ctx.msg.edit(embed=embgdt)
-            raise TimeoutError("TIMED OUT!")
+            raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
 
         opt.method = UploadMethod.GOOGLE_DRIVE
 
@@ -502,7 +502,7 @@ async def upload1(d_ctx: DiscordContext, save_location: str) -> str:
 
         except asyncio.TimeoutError:
             await d_ctx.msg.edit(embed=embgdt)
-            raise TimeoutError("TIMED OUT!")
+            raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
 
     return file_path
 
@@ -580,7 +580,7 @@ async def upload2_special(d_ctx: DiscordContext, save_location: str, max_files: 
             uploaded_file_paths = (await task_handler(d_ctx, task, []))[0][0]
         except asyncio.TimeoutError:
             await d_ctx.msg.edit(embed=embgdt)
-            raise TimeoutError("TIMED OUT!")
+            raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
 
     return uploaded_file_paths
 
@@ -789,7 +789,7 @@ async def send_final(d_ctx: DiscordContext, file_name: str, zipupPath: str, shar
             task = [lambda: d_ctx.ctx.send(content=extra_msg, file=discord.File(final_file), reference=d_ctx.msg)]
             await task_handler(d_ctx, task, [])
         except asyncio.TimeoutError:
-            raise TimeoutError("TIMED OUT!")
+            raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
         except aiohttp.ClientError:
             raise FileError("Failed to upload file.")
     else:
@@ -842,7 +842,7 @@ async def qr_interface_main(d_ctx: DiscordContext, stored_saves: dict[str, dict[
        message = await bot.wait_for("message", check=lambda message: qr_check(message, d_ctx.ctx, entries_added, "EXIT"), timeout=OTHER_TIMEOUT) 
     except asyncio.TimeoutError:
         await clean_msgs(game_msgs)
-        raise TimeoutError("TIMED OUT!")
+        raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
 
     await message.delete()
     await clean_msgs(game_msgs)
@@ -895,7 +895,7 @@ async def run_qr_paginator(d_ctx: DiscordContext, stored_saves: dict[str, dict[s
         except asyncio.TimeoutError:
             await paginator.disable(page=pages_list[0])
             await p_msg.delete()
-            raise TimeoutError("TIMED OUT!")
+            raise TimeoutError("- Timed Out!\n- انتهى الوقت!")
 
         await message.delete()
 
