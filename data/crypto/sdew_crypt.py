@@ -31,7 +31,7 @@ class Crypt_Sdew:
         for filepath in files:
             async with aiofiles.open(filepath, "rb") as savegame:
                 header = await savegame.read(2)
-            if await CC.is_valid_zlib_header(header):
+            if CC.is_valid_zlib_header(header):
                 await Crypt_Sdew.decrypt_file(filepath)
 
     @staticmethod
@@ -40,5 +40,5 @@ class Crypt_Sdew:
             return
         async with aiofiles.open(filepath, "rb") as savegame:
             header = await savegame.read(2)
-        if not await CC.is_valid_zlib_header(header):
+        if not CC.is_valid_zlib_header(header):
             await Crypt_Sdew.encrypt_file(filepath)
