@@ -666,7 +666,7 @@ async def replace_decrypted(
         ) -> list[str]:
 
     """Used in the encrypt command to replace files one by one, or how many you want at once."""
-    from utils.namespaces import Crypto
+
     completed = []
     if upload_individually:
         total_count = 0
@@ -686,7 +686,7 @@ async def replace_decrypted(
             await aiofiles.os.replace(attachment_path, new_path) # use replace to prevent collision
 
             if not ignore_secondlayer_checks:
-                await extra_import(Crypto, titleid, new_path, savepairname)
+                await extra_import(titleid, new_path, savepairname)
 
             task = [lambda: fInstance.replacer(new_path, cwd_here, last_N)]
             await task_handler(d_ctx, task, [])
@@ -760,7 +760,7 @@ async def replace_decrypted(
                             await aiofiles.os.rename(path, new_path)
 
                             if not ignore_secondlayer_checks:
-                                await extra_import(Crypto, titleid, new_path, savepairname)
+                                await extra_import(titleid, new_path, savepairname)
 
                             task = [lambda: fInstance.replacer(new_path, cwd_here, last_N)]
                             await task_handler(d_ctx, task, [])
