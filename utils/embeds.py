@@ -185,7 +185,9 @@ blacklist_emb.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 
 embChannelError = discord.Embed(
     title="Error | خطأ",
-    description="- Invalid channel!\n- قناة خاطئة!",
+    description=
+    "- Invalid channel!\n  - Please go to this channel https://discord.com/channels/901212631103328316/1324776984999624807.\n"
+    "- قناة خاطئة!\n  - يرجى الذهاب إلى هذه القناة https://discord.com/channels/901212631103328316/1324776984999624807.",
     colour=Color.DEFAULT.value
 )
 embChannelError.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
@@ -488,8 +490,8 @@ embRdone.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
 embresbsf = discord.Embed(
     title="Resigning process (Encrypted): Successful <a:tick_mark:1142861488206381056>\nعملية تحويل التخزينة : ناجحة <a:tick_mark:1142861488206381056>",
     description=(
-        "- **{printed}** resigned to **{id}**.\n"
-        "- **{id}** تم تحويلها الى **{printed}**."
+        "- **`{printed}`** resigned to **`{id}`**.\n"
+        "- **`{id}`** تم تحويلها الى **`{printed}`**."
     ),
     colour=Color.DEFAULT.value
 )
@@ -826,7 +828,7 @@ embdecFormat = discord.Embed(
 embdecFormat.set_footer(text="If you want to use the file in a save editor, choose 'Decrypted'!")
 
 embwlcom = discord.Embed(
-    title="Welcome **`{user}`**\nاهلاً و سهلاً يا **`{user}`**",
+    title="Welcome **`{user}`** <a:pikachu:1475180008178979060>\nاهلاً و سهلاً يا **`{user}`** <a:pikachu:1475180008178979060>",
     description=(
                 f"📌 **How to use the bot:**\n"
                 f"- Type **`/`** and select a command to begin.\n\n"
@@ -843,6 +845,6 @@ embwlcom = discord.Embed(
                 f"- يرجى عدم استخدام أكثر من حساب بلايستيشن واحد وإلا سيتم سحب صلاحيتك بشكل دائم.\n"
                 f"- **فقط** <@&1169543372717953024> **مسموح لهم استخدام اكثر من حساب بلايستيشن.**"
                 ),
-    colour=Color.DEFAULT.value
+    colour=0x00ffcc
 )
 embwlcom.set_footer(text=Embed_t.DEFAULT_FOOTER.value)
