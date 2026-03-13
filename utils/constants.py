@@ -72,12 +72,12 @@ else:
     blacklist_logger = logger
 
 # CONFIG
-IP = str(os.getenv("IP"))
+IP = os.getenv("IP")
 PORT_FTP = int(os.getenv("FTP_PORT"))
 PORT_CECIE = int(os.getenv("CECIE_PORT"))
-MOUNT_LOCATION = str(os.getenv("MOUNT_PATH"))
-PS_UPLOADDIR = str(os.getenv("UPLOAD_PATH"))
-STORED_SAVES_FOLDER = str(os.getenv("STORED_SAVES_FOLDER_PATH"))
+MOUNT_LOCATION = os.getenv("MOUNT_PATH")
+PS_UPLOADDIR = os.getenv("UPLOAD_PATH")
+STORED_SAVES_FOLDER = os.getenv("STORED_SAVES_FOLDER_PATH")
 APP_PROFILES_PATH = "profiles.json"
 APP_SETTINGS_PATH = "settings.json"
 UPLOAD_ENCRYPTED = os.path.join("UserSaves", "uploadencrypted")
@@ -91,7 +91,7 @@ RANDOMSTRING_LENGTH = 10
 DATABASENAME_THREADS = "valid_threads.db"
 DATABASENAME_ACCIDS = "account_ids.db"
 DATABASENAME_BLACKLIST = "blacklist.db"
-TOKEN = str(os.getenv("TOKEN"))
+TOKEN = os.getenv("TOKEN")
 # how to obtain NPSSO:
 # go to playstation.com and login
 # go to this link https://ca.account.sony.com/api/v1/ssocookie
@@ -100,9 +100,10 @@ TOKEN = str(os.getenv("TOKEN"))
 # if you leave it None the psn.flipscreen.games website will be used to obtain account ID
 class NPSSO:
     def __init__(self) -> None:
-        self.val: str = str(os.getenv("NPSSO"))
+        self.val: str = os.getenv("NPSSO")
 NPSSO_global = NPSSO()
 
+psnawp: PSNAWP | None
 if os.path.basename(argv[0]) == "bot.py":
     if NPSSO_global.val:
         psnawp = PSNAWP(NPSSO_global.val)
@@ -191,6 +192,9 @@ LOH_TRAILS_DAYBREAK_TITLEID = frozenset([
     # The Legend of Heroes: Beyond The Horizon
     "CUSA51533", "CUSA51534"
 ])
+FF7CC_TITLEID = frozenset([
+    "CUSA31351", "CUSA31348", "CUSA31350", "CUSA31349"
+])
 
 def verify_titleids() -> None:
     from utils.orbis import check_titleid
@@ -199,7 +203,7 @@ def verify_titleids() -> None:
         MGSV_TPP_TITLEID, MGSV_GZ_TITLEID, MGSV_DE_TITLEID, REV2_TITLEID, RE7_TITLEID, RERES_TITLEID, DL1_TITLEID, DL2_TITLEID, RGG_TITLEID, DI1_TITLEID,
         DI2_TITLEID, NMS_TITLEID, TERRARIA_TITLEID, SMT5_TITLEID, RCUBE_TITLEID, DSR_TITLEID, RE4R_TITLEID, RE3R_TITLEID, RE2R_TITLEID,
         DIGIMON_TITLEID, SDEW_TITLEID, NIOH2_TITLEID, MINECRAFT_TITLEID, MHWI_TITLEID, RE_VILLAGE_TITLEID, LA_NOIRE_TITLEID, LOH_TRAILS_CS4_TITLEID,
-        LOH_TRAILS_ZERO_AZURE, LOH_TRAILS_DAYBREAK_TITLEID
+        LOH_TRAILS_ZERO_AZURE, LOH_TRAILS_DAYBREAK_TITLEID, FF7CC_TITLEID
     ])
     for ts in title_ids:
         for t in ts:
