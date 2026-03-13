@@ -838,10 +838,10 @@ embwlcom = discord.Embed(
                 f"- اكتب **`/`** واختر الأمر الذي تريده.\n\n"
                 f"❓ **تحتاج مساعده ؟**\n"
                 f"- اكتب **`/help`** او اسأل في <#1171086371029532745>.\n\n\n"
-                f"### ⚠️ **Important:**\n"
+                f"### <a:warning1:1479422977685590189> **Important:**\n"
                 f"- Please do not use more than one PlayStation account or your access will be permanently revoked.\n"
                 f"- **Only** <@&1169543372717953024> **are allowed to use many PlayStation accounts.**\n\n"
-                f"### ⚠️ **مهم:**\n"
+                f"### <a:warning1:1479422977685590189> **مهم:**\n"
                 f"- يرجى عدم استخدام أكثر من حساب بلايستيشن واحد وإلا سيتم سحب صلاحيتك بشكل دائم.\n"
                 f"- **فقط** <@&1169543372717953024> **مسموح لهم استخدام اكثر من حساب بلايستيشن.**"
                 ),
