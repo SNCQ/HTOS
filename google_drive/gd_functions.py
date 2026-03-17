@@ -760,7 +760,7 @@ class GDapi:
         if filecount == 0:
             raise GDapiError("- Invalid files uploaded, or no files found!\n- الملفات غير صحيحة او لا توجد ملفات!")
         elif filecount > max_files:
-            raise GDapiError(f"Amount of files cannot exceed {max_files}!")
+            raise GDapiError(f"- Amount of files cannot exceed {max_files}!\n- عدد الملفات يجب ان لا تتعدى {max_files}!")
         elif total_filesize > self.TOTAL_SIZE_LIMIT:
             raise GDapiError(f"Total size cannot exceed: {bytes_to_mb(self.TOTAL_SIZE_LIMIT)} MB!")
 
@@ -833,7 +833,7 @@ class GDapi:
         if filecount == 0:
             raise GDapiError("- Invalid files uploaded, or no files found!\n- الملفات غير صحيحة او لا توجد ملفات!")
         elif filecount > max_files:
-            raise GDapiError(f"Amount of files cannot exceed {max_files}!")
+            raise GDapiError(f"- Amount of files cannot exceed {max_files}!\n- عدد الملفات يجب ان لا تتعدى {max_files}!")
         elif total_filesize > self.TOTAL_SIZE_LIMIT:
             raise GDapiError(f"Total size cannot exceed: {self.TOTAL_SIZE_LIMIT}!")
         elif savesize is not None and total_filesize > savesize:
