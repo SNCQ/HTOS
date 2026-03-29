@@ -198,6 +198,9 @@ FF7CC_TITLEID = frozenset([
 TOSR_TITLEID = frozenset([
     "CUSA29101", "CUSA29102", "CUSA29214", "CUSA29738"
 ])
+RE5_TITLEID = frozenset([
+    "CUSA04290", "CUSA09845", "CUSA04284", "CUSA04437"
+])
 
 def verify_titleids() -> None:
     from utils.orbis import check_titleid
