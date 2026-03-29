@@ -62,9 +62,4 @@ async def startup_ui():
 
 ui.timer(0, startup_ui, once=True)
 
-ui.run(
-    reload=args.reload,
-    native=True,
-    dark=True,
-    window_size=(1400, 800)
-)
+ui.run(reload=args.reload, native=True, dark=True, window_size=(1400, 800))
