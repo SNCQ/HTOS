@@ -21,9 +21,9 @@ class OrbisError(Exception):
 class WorkspaceError(Exception):
     """Exception raised for errors to the workspace."""
     def __init__(self, message: str) -> None:
-        self.message = message   
+        self.message = message
 
 class TaskCancelledError(Exception):
     """Exception raised for cancelled tasks."""
     def __init__(self, message: str) -> None:
-        self.message = message   
+        self.message = message
